@@ -2,8 +2,9 @@ A fork of [joona/CockpitCMS-Auth0](https://github.com/joona/CockpitCMS-Auth0).
 
 Updated to work on the newest version of [Cockpit CMS](https://github.com/agentejo/cockpit).
 
-## Additional Features
+## Additional Features / Tweaks
 - Role Groups: Allows you to specify Cockpit group names for Auth0 roles.
+- Login: Auth0 logo removed & title replaced with Cockpit "app.name"
 
 # Configuration
 
@@ -19,6 +20,14 @@ In the Cockpit configuration (`config/config.php`), place the following:
     'session_ttl'       => 10*24*60,
     'namespace'         => 'https://my-namespace.com',
     
+    // Optional Lock Options
+    'secret'            => '', // Auth0 Secret
+    'lock_options'      => [], // Array of Auth0 Lock options - see https://auth0.com/docs/libraries/lock/lock-configuration
+    'theme'             => [
+        'logo'  => 'https://my-app.com/path/to/logo.png'
+    ],
+    
+    // Roles / Groups
     'default_group'     => 'auth0user',
     'use_roles'         => true,
     'role_groups'       => [

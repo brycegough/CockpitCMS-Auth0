@@ -40,6 +40,12 @@ const logoutButton = document.getElementById('logout');
 const lock = new Auth0Lock('<?= $app['config/auth0/id'] ?>', '<?= $app['config/auth0/domain'] ?>', Object.assign({
   container: 'login-container',
   allowSignUp: false,
+  theme: {
+    logo: ''
+  },
+  languageDictionary: {
+    title: '<?= $app['app.name'] ?>'
+  },
   auth: {
     sso: false,
     params: {
@@ -73,7 +79,7 @@ function authorize(token, isFresh) {
 
   const data = { token: token, auth0: true };
 
-  fetch('/api/auth0/authorize', 
+  fetch('/api/auth0/authorize',
     {
       method: 'POST',
       mode: 'cors',

@@ -1,4 +1,15 @@
 <?php
+/*
+ *
+ * Cockpit CMS - Auth0 Module
+ * v1.0.0
+ *
+ *
+ * [ Authors ]
+ *  - Paulo Gomes      https://github.com/pauloamgomes
+ *  - Joona Kulmala    https://github.com/joona 
+ *  - Bryce Gough      https://github.com/brycegough
+ */
 
 function err() {
   if(!getenv('AUTH0_DEBUG')) return;

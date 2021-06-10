@@ -16,8 +16,6 @@ Updated to work on the newest version of [Cockpit CMS](https://github.com/agente
 
 #### Using Auth0 Roles (Multiple User Types)
 
-If you would like to use the Auth0 roles in your application:
-
 4. Set "use_roles" to true.
 5. Create a new Auth0 rule using the code at the bottom of this article to ensure roles are included when logging in.
 6. Configure the "role_groups" option to include your new role (Format: 'AUTH0_ROLE_NAME' => 'COCKPIT_ROLE_NAME')

@@ -1,38 +1,81 @@
+A fork of [joona/CockpitCMS-Auth0](https://github.com/joona/CockpitCMS-Auth0).
+
+Updated to work on the newest version of [Cockpit CMS](https://github.com/agentejo/cockpit).
+
+## Additional Features
+- Role Groups: Allows you to specify Cockpit group names for Auth0 roles.
+
 # Configuration
 
-In the Cockpit yaml `config/config.yaml`:
+In the Cockpit configuration (`config/config.php`), place the following:
 
 ```
-auth0:
-    enabled: true
-    domain: company.eu.auth0.com
-    id: xxxxLG1Phms1LsZAnrNe3xxxxxx
-    scope: openid profile email
-    cache: true
-    default_group: author           # optional, defaults to auth0user
-    session_ttl: 10*24*60           # optional, customize php session TTL
-    namespace: https://company.com  # optional, see below
+'auth0' => [
+    'enabled'           => true,
+    'domain'            => 'my-app.auth0.com',
+    'id'                => 'APP_ID',
+    'scope'             => 'openid profile email read:roles',
+    'cache'             => true,
+    'session_ttl'       => 10*24*60,
+    'namespace'         => 'https://my-namespace.com',
+    
+    'default_group'     => 'auth0user',
+    'use_roles'         => true,
+    'role_groups'       => [
+        'Backend'   => 'admin' 
+    ]
+],
+  
+'groups' => [
+    
+    'auth0user' => [
+        '$admin'    => false,
+        '$vars'     => [
+            'finder.path' => '/upload'
+        ],
+        'cockpit'   => [
+            'backend'   => true,
+            'finder'    => true
+        ]
+    ]
+        
+ ]
 ```
 
-Auth0 no longer exposes `app_metadata` or user assigned roles via tokeninfo endpoint. However, you can fix this with custom Auth0 rule:
+## Roles
+
+You will then need to add the following rule to Auth0 to allow the Roles to be exposed when fetching user data:
 
 ```
 function (user, context, callback) {
-  const namespace = 'https://company.com/';
-  if(user.app_metadata && user.app_metadata.cockpit) {
-    context.idToken[namespace + 'cockpit'] = user.app_metadata.cockpit;
-  }
-  context.idToken[namespace + 'roles'] = context.authorization.roles || [];
-  callback(null, user, context);
+    if (context.clientID === 'CLIENTID') {
+        const namespace = 'https://NAMESPACE';
+        context.idToken[namespace] = {
+            roles: (context.authorization || {}).roles
+        };
+    }
+    callback(null, user, context);
 }
 ```
-To make this work, you also need to add `app_metadata` and `roles` scopes to your authorization scope. You also need to add `namespace: https://company.com` to the configuration under `auth0`, so that plugin knows where to read namespaced information. This way you can assign `admin` Cockpit role by assigning role `cockpit:admin` on Auth0 or by setting up custom roles for cockpit in the `app_metadata`.
+To make this work, ensure the `read:roles` scope is listed in your authorization scope (see example config above). 
+You also need to add your namespace to the configuration so that plugin knows where to read namespaced information. 
+
+### Role Groups
+
+You can then set the "role_groups" setting to let Cockpit know which Auth0 Roles to assign groups for.
+
+For example, if you created a role called "Backend" in Auth0, the following will add any users with this role to the "admin" group.
 
 ```
-{ "cockpit": "yourrole" }
+'role_groups' => [
+    'Backend'   => 'admin' 
+]
 ```
 
 ## Note on user accounts
 
-To make document author associations to work, this plugin creates copy of the Auth0 user automatically to the accounts. This user won't have a password, and will have email prefixed with `auth0:$email`, so loggin in with these generated accounts is not possible without Auth0. Generated users will also have additional `generated` flag in the user document.
+To make document author associations to work, this plugin creates copy of the Auth0 user automatically to the accounts. 
+This user won't have a password, and will have email prefixed with `auth0:$email`, so loggin in with these generated accounts is not possible without Auth0. 
+
+Generated users will also have additional `generated` flag in the user document.
 

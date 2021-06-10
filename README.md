@@ -1,11 +1,11 @@
 A fork of [joona/CockpitCMS-Auth0](https://github.com/joona/CockpitCMS-Auth0).
 
-Updated to work on the newest version of [Cockpit CMS](https://github.com/agentejo/cockpit).
+Updated to work on the newest version of [Cockpit CMS](https://github.com/agentejo/cockpit) (v0.12.1).
 
 ## Additional Features
 - Role Groups: Allows you to specify Cockpit group names for Auth0 roles.
 
-# Configuration
+## Configuration
 
 In the Cockpit configuration (`config/config.php`), place the following:
 

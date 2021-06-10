@@ -3,24 +3,31 @@ A fork of [joona/CockpitCMS-Auth0](https://github.com/joona/CockpitCMS-Auth0).
 Updated to work on the newest version of [Cockpit CMS](https://github.com/agentejo/cockpit) (v0.12.1).
 
 ## Additional Features / Tweaks
+
 - Role Groups: Allows you to specify Cockpit group names for Auth0 roles.
 - Login: Auth0 logo removed & title replaced with Cockpit "app.name"
 
+
 ## Setup
+
 1. Download repository and place files in a new folder called "auth0"
 2. Upload "auth0" folder to "/{COCKPIT_ROOT}/modules/"
 3. Edit "/{COCKPIT_ROOT}/config/config.php" - using the below example for reference
 
 #### Using Auth0 Roles (Multiple User Types)
+
 If you would like to use the Auth0 roles in your application:
+
 4. Set "use_roles" to true.
 5. Create a new Auth0 rule using the code at the bottom of this article to ensure roles are included when logging in.
 6. Configure the "role_groups" option to include your new role (Format: 'AUTH0_ROLE_NAME' => 'COCKPIT_ROLE_NAME')
 
 #### Without Roles (Single User Type)
+
 4. Set "use_roles" to false.
 5. Set "default_group" to the Cockpit group you would like all users to be assigned to.
 6. Configure your Cockpit group by adding it's configuration to the core "groups" setting - see below configuration for example.
+
 
 ## Configuration
 

@@ -1,5 +1,6 @@
 {
     "require": {
-        "auth0/auth0-php": "^7.9"
+        "auth0/auth0-php": "^7.9",
+        "kodus/file-cache": "^1.1"
     }
 }

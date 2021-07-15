@@ -32,8 +32,6 @@ class RestApi extends \LimeExtra\Controller {
       // set user to session
       $this->module('cockpit')->setUser($user, true);
 
-      err('_SESSION after authorization', var_export($_SESSION['cockpit.app.auth'], true));
-
       return array_merge([
         'authorized' => true
       ], $user);

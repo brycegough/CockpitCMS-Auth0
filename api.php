@@ -37,8 +37,6 @@ $app->on('cockpit.api.authenticate', function($data) use($app) {
                 $tokenVerifier = new TokenVerifier($issuer, $audience, $sigVerifier);
                 $decoded = $tokenVerifier->verify( $accessToken );
 
-                error_log( print_r($decoded, true) );
-
                 // Allow access via API - TODO scopes
 
                 if ( $decoded ) {

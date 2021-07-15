@@ -2,24 +2,21 @@
 /*
  *
  * Cockpit CMS - Auth0 Module
- * v1.0.0
+ * v1.1.0
  *
  *
  * [ Authors ]
  *  - Paulo Gomes      https://github.com/pauloamgomes
- *  - Joona Kulmala    https://github.com/joona 
+ *  - Joona Kulmala    https://github.com/joona
  *  - Bryce Gough      https://github.com/brycegough
  */
 
-function err() {
-  if(!getenv('AUTH0_DEBUG')) return;
-  $args = func_get_args();
-  $str = join(' ', $args);
-  error_log($str);
-}
+//define('AUTH0_DEBUG', 1);
+
+require(__DIR__ . '/vendor/autoload.php');
 
 $this->module('auth0')->extend([
-    
+
     /*
      * Get or create a user via Auth0
      */
@@ -28,11 +25,8 @@ $this->module('auth0')->extend([
     if(!isset($info['email'])) return null;
 
     $maybeUser = $this->app->storage->findOne('cockpit/accounts', ['user' => $info['sub']]);
-    err("Got cockpit user:", var_export($maybeUser, true));
 
     if(!$maybeUser) {
-      err("User not found with id", var_export($maybeUser, true));
-
       $now = time();
       $emailParts = explode('@', $info['email']);
       $username = $emailParts[0];
@@ -50,32 +44,39 @@ $this->module('auth0')->extend([
         'generated' => true
       ];
 
-      if(isset($info['locale'])) {
-        //$user['i18n'] = $info['locale'];
-      }
-
       $this->app->storage->insert('cockpit/accounts', $user);
-      err("Auth0 user added:", var_export($user, true));
+      
       $maybeUser = $user;
       $maybeUser['_fresh'] = true;
     }
 
     return $maybeUser;
   },
-    
-    'getDomain' => function() use($app) {
-        return $app->retrieve('config/auth0/domain', false);  
+
+    /*
+     * Fetch config options 
+     */
+    'getAudience' => function() use($app) {
+        return $app->retrieve('config/auth0/audience', false);
     },
-    
+
+    'getClientId' => function() use($app) {
+        return $app->retrieve('config/auth0/id', false);
+    },
+
+    'getDomain' => function() use($app) {
+        return $app->retrieve('config/auth0/domain', false);
+    },
+
     'getNamespace' => function() use($app) {
         $domain = $app->module('auth0')->getDomain();
-        return $app->retrieve('config/auth0/namespace', 'https://'.$domain);  
+        return $app->retrieve('config/auth0/namespace', 'https://'.$domain);
     },
-    
+
     'getRoleGroups' => function() use($app) {
-        return $app->retrieve('config/auth0/role_groups', []);  
+        return $app->retrieve('config/auth0/role_groups', []);
     },
-    
+
     'getDefaultGroup' => function() use($app) {
         return $app->retrieve('config/auth0/default_group', 'auth0user');
     },
@@ -106,7 +107,6 @@ $this->module('auth0')->extend([
         ]);
 
         $result = curl_exec($ch);
-        err("Auth0 response", var_export($result, true));
 
         if(!$result) {
             trigger_error(curl_error($ch));
@@ -115,13 +115,12 @@ $this->module('auth0')->extend([
         curl_close($ch);
 
         $info = json_decode($result, true);
-      
-    } elseif (!empty($result)) {
-        err("Got cached info", var_export($result, true));
+
     }
 
-    if(!empty($info['error'])) {
-      err("Auth0 Error", var_export($info, true));
+    if (!empty($info['error'])) {
+      error_log("[Auth0 Error] " . var_export($info, true));
+      
       $this->app->helper('cache')->write("auth0.user.{$domain}.{$token}", null, $options['cache']);
       return null;
     }
@@ -135,10 +134,10 @@ $this->module('auth0')->extend([
         $userGroup = $app->module('auth0')->getDefaultGroup();
 
         if ($options['use_roles']) {
-            
+
             $roles = $info[$namespace]['roles'] ?? [];
             $role_groups = $app->module('auth0')->getRoleGroups();
-            
+
             if (is_array($roles) && is_array($role_groups)) {
                 foreach ($roles as $role) {
                     if ( isset( $role_groups[ $role ] ) ) {
@@ -146,9 +145,9 @@ $this->module('auth0')->extend([
                     }
                 }
             }
-            
+
         }
-      
+
       // get or create cockpit account for user
       $cockpitUser = $app->module('auth0')->getOrCreateUser($info);
 
@@ -161,14 +160,12 @@ $this->module('auth0')->extend([
 
       $user['auth0'] = $info;
       $user['cockpit_user'] = $cockpitUser;
-      
+
       $info = $user;
     }
 
-
     $info['auth0token'] = $token;
-
-    err("Userinfo", var_export($info, true));
+    
     return $info;
   }
 ]);
@@ -176,17 +173,17 @@ $this->module('auth0')->extend([
 /*
  * If module is not enabled, we're done here
  */
-if (!$app->retrieve('config/auth0/enabled')) {
+if ( ! $app->retrieve('config/auth0/enabled') ) {
   return;
 }
 
 $app('acl')->addResource('cockpit', [
-  'backend', 
-  'finder', 
-  'accounts', 
-  'settings', 
-  'rest', 
-  'webhooks', 
+  'backend',
+  'finder',
+  'accounts',
+  'settings',
+  'rest',
+  'webhooks',
   'info'
 ]);
 

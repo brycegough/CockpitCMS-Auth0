@@ -1,23 +1,66 @@
 <?php
+use Auth0\SDK\Exception\InvalidTokenException;
+use Auth0\SDK\Helpers\JWKFetcher;
+use Auth0\SDK\Helpers\Tokens\AsymmetricVerifier;
+use Auth0\SDK\Helpers\Tokens\TokenVerifier;
 
 $app->on('cockpit.api.authenticate', function($data) use($app) {
-    err('Checking user session', var_export($data, true));
 
-    if ($data['token'] && $data['resource'] == 'auth0') {
-        $user = $this->module('auth0')->userinfo($data['token'], [
-            'normalize' => true,
-            'cache'     => $app->retrieve('config/auth0/cache', false)
-        ]);
+    if ( $data['token'] ) {
 
-        err('authentication middleware got user', var_export($user, true));
+        if ($data['resource'] == 'auth0') {
+            $user = $this->module('auth0')->userinfo($data['token'], [
+                'normalize' => true,
+                'cache'     => $app->retrieve('config/auth0/cache', false)
+            ]);
 
-        if ($user) {
-            $data['authenticated'] = true;
-            $data['user'] = $user;
+            if ($user) {
+                $data['authenticated'] = true;
+                $data['user'] = $user;
+            }
+
+        } else {
+
+            // Authenticate token scope
+            // TODO - cache & scopes
+
+            try {
+                $accessToken = $data['token'];
+
+                $issuer = 'https://' . $app->module('auth0')->getDomain() . '/';
+                $audience = $app->module('auth0')->getAudience();
+
+                $jwksFetcher = new JWKFetcher();
+                $jwks        = $jwksFetcher->getKeys($issuer . '.well-known/jwks.json');
+                $sigVerifier = new AsymmetricVerifier( $jwks );
+
+                $tokenVerifier = new TokenVerifier($issuer, $audience, $sigVerifier);
+                $decoded = $tokenVerifier->verify( $accessToken );
+                
+                // Allow access via API - TODO scopes
+                if ( $decoded ) {
+
+                    $data['authenticated'] = true;
+
+                    // Set user
+
+                    $user = $this->module('auth0')->userinfo($accessToken, [
+                        'normalize' => true,
+                        'cache'     => $app->retrieve('config/auth0/cache', false)
+                    ]);
+
+                    if ( $user ) {
+                        $data['user'] = $user;
+                    }
+                }
+
+            } catch (\Exception $e) {
+                $this->stop([ 'error' => $e->getMessage() ], 401);
+            }
+
         }
     }
 
-    err('Authenticate', var_export($data, true));
 });
 
 $app->on('cockpit.rest.init', function($routes) use($app) {

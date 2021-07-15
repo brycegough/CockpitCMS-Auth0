@@ -77,6 +77,10 @@ In the Cockpit configuration (`config/config.php`), place the following:
  ]
 ```
 
+## API Permissions
+To use permissions for your API endpoints, you will need to enable RBAC in your Auth0 API settings.
+This will allow Cockpit to extract the users permissions from their access token so they can be used to authenticate a specific endpoint.
+
 ## Roles
 
 You will then need to add the following rule to Auth0 to allow the Roles to be exposed when fetching user data:

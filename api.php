@@ -36,22 +36,13 @@ $app->on('cockpit.api.authenticate', function($data) use($app) {
 
                 $tokenVerifier = new TokenVerifier($issuer, $audience, $sigVerifier);
                 $decoded = $tokenVerifier->verify( $accessToken );
-                
+
+                error_log( print_r($decoded, true) );
+
                 // Allow access via API - TODO scopes
+
                 if ( $decoded ) {
-
                     $data['authenticated'] = true;
-
-                    // Set user
-
-                    $user = $this->module('auth0')->userinfo($accessToken, [
-                        'normalize' => true,
-                        'cache'     => $app->retrieve('config/auth0/cache', false)
-                    ]);
-
-                    if ( $user ) {
-                        $data['user'] = $user;
-                    }
                 }
 
             } catch (\Exception $e) {

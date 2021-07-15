@@ -34,30 +34,35 @@ In the Cockpit configuration (`config/config.php`), place the following:
 ```
 'auth0' => [
     'enabled'           => true,
-    'domain'            => 'my-app.auth0.com',
-    'id'                => 'APP_ID',
-    'scope'             => 'openid profile email read:roles',
-    'cache'             => true,
-    'session_ttl'       => 10*24*60,
-    'namespace'         => 'https://my-namespace.com',
-    
+
+    // App Settings
+    'domain'            => 'my-app.auth0.com',                  // Auth0 Domain
+    'id'                => 'APP_ID',                            // App Client ID
+    'scope'             => 'openid profile email read:roles',   // Scopes for Cockpit Admin login to use
+    'cache'             => true,                                // Use cache?
+    'session_ttl'       => 10*24*60,                            // TTL
+    'namespace'         => 'https://my-namespace.com',          // App Namespace
+
+    // API Settings
+    'audience'          => 'api.iconica.com.au',                // API Identifier
+
     // Optional Lock Options
     'secret'            => '', // Auth0 Secret
     'lock_options'      => [], // Array of Auth0 Lock options - see https://auth0.com/docs/libraries/lock/lock-configuration
     'theme'             => [
         'logo'  => 'https://my-app.com/path/to/logo.png'
     ],
-    
+
     // Roles / Groups
     'default_group'     => 'auth0user',
     'use_roles'         => true,
     'role_groups'       => [
-        'Backend'   => 'admin' 
+        'Backend'   => 'admin'
     ]
 ],
-  
+
 'groups' => [
-    
+
     'auth0user' => [
         '$admin'    => false,
         '$vars'     => [
@@ -68,7 +73,7 @@ In the Cockpit configuration (`config/config.php`), place the following:
             'finder'    => true
         ]
     ]
-        
+
  ]
 ```
 
@@ -87,8 +92,8 @@ function (user, context, callback) {
     callback(null, user, context);
 }
 ```
-To make this work, ensure the `read:roles` scope is listed in your authorization scope (see example config above). 
-You also need to add your namespace to the configuration so that plugin knows where to read namespaced information. 
+To make this work, ensure the `read:roles` scope is listed in your authorization scope (see example config above).
+You also need to add your namespace to the configuration so that plugin knows where to read namespaced information.
 
 ### Role Groups
 
@@ -98,14 +103,13 @@ For example, if you created a role called "Backend" in Auth0, the following will
 
 ```
 'role_groups' => [
-    'Backend'   => 'admin' 
+    'Backend'   => 'admin'
 ]
 ```
 
 ## Note on user accounts
 
-To make document author associations to work, this plugin creates copy of the Auth0 user automatically to the accounts. 
-This user won't have a password, and will have email prefixed with `auth0:$email`, so loggin in with these generated accounts is not possible without Auth0. 
+To make document author associations to work, this plugin creates copy of the Auth0 user automatically to the accounts.
+This user won't have a password, and will have email prefixed with `auth0:$email`, so loggin in with these generated accounts is not possible without Auth0.
 
 Generated users will also have additional `generated` flag in the user document.
-

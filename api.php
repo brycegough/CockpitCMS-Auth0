@@ -44,7 +44,7 @@ $app->on('cockpit.api.authenticate', function($data) use($app) {
 
                     // TODO - permissions
 
-                    $data['authenticated'] = true;
+                    $data['authenticated'] = is_array($permissions) && count($permissions) > 0;
                 }
 
             } catch (\Exception $e) {
